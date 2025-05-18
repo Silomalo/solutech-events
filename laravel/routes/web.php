@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
     require __DIR__ . '/central/central_routes.php';
+    require __DIR__ . '/tenants/events_routes.php';
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

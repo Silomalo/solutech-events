@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden min-h-[70vh]">
                         <thead>
                             <tr class="bg-gray-700 text-white">
                                 <th class="px-4 py-2 text-left">#NO</th>
