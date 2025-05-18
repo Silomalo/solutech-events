@@ -27,3 +27,20 @@
 /.nova
 /.vscode
 /.zed
+
+# Nuxt dev/build outputs
+/nuxt/.output
+/nuxt/.data
+/nuxt/.nuxt
+/nuxt/.nitro
+/nuxt/.cache
+/nuxt/dist
+/nuxt/node_modules
+/nuxt/logs
+/nuxt/*.log
+/nuxt/.DS_Store
+/nuxt/.fleet
+/nuxt/.idea
+/nuxt/.env
+/nuxt/.env.*
+/nuxt/!.env.example
