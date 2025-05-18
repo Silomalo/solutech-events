@@ -17,5 +17,6 @@ class Event extends Model
         'date',
         'price',
         'max_attendees',
+        'cover_image',
     ];
 }

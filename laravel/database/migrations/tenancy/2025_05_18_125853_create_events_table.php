@@ -15,12 +15,14 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->uuid('serial_number');
+            $table->string('cover_image')->nullable();
             $table->string('title');
             $table->longText('description');
             $table->string('venue');
             $table->date('date');
             $table->decimal('price', 10, 2);
             $table->integer('max_attendees');
+            $table->boolean('status')->default(true);
             $table->softDeletes();
             $table->timestamps();
         });

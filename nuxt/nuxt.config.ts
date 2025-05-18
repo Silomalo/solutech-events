@@ -15,4 +15,16 @@ export default defineNuxtConfig({
       apiUrl: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3000",
     },
   },
+  // Register global middleware
+  // routeRules: {
+  //   '/account/**': { middleware: ['auth'] },
+  //   '/login': { middleware: ['auth'] },
+  //   '/register': { middleware: ['auth'] },
+  //   '/forgot-password': { middleware: ['auth'] },
+  //   '/reset-password': { middleware: ['auth'] },
+  // },
+  // Register plugins
+  plugins: [
+    '~/plugins/auth.ts'
+  ],
 });
