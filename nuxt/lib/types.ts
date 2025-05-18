@@ -5,6 +5,7 @@ export interface OrganizationalType {
   tenant_domain: string;
   events: {
     id: number;
+    title: string;
     venue: string;
     date: string;
     price: string;
