@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Exception;
 use App\Models\Tenant;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
@@ -60,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
         $currency = 'Ksh. ';
         // View::share('currency', $currency, 'logo', $logo, 'title', $title);
         // View::share(compact('currency', 'company_logo', 'title', 'templates'));
-        View::share(compact('currency', 'title', 'tenant_details', 'templates'));
+        // View::share(compact('currency', 'title', 'tenant_details', 'templates'));
         // dd($templates);
 
         Blade::directive('currencyFormat', function ($expression) use ($currency) {
