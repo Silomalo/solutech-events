@@ -56,6 +56,14 @@ class APIController extends Controller
             // Fetch events from the tenant's database
             $events = DB::table('events')->select('id', 'title', 'venue','date','price')->get();
             $organization->events = $events;
+
+            //if user is logged in take auth user id and check attendees table to see is the user is subscribed to the event
+            if (auth()->check()) {
+                $userId = auth()->user()->id;
+                foreach ($events as $event) {
+                    $event->is_subscribed = DB::table('attendees')->where('event_id', $event->id)->where('user_id', $userId)->exists();
+                }
+            }
         }
 
         return response()->json($organizations);

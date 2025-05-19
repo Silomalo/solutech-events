@@ -24,7 +24,7 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header Navigation -->
-    <header class="bg-white shadow-sm">
+    <!-- <header class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <nav class="flex justify-between items-center">
           <h2 class="text-xl font-semibold text-[var(--color-primary)]">Organization Portal</h2>
@@ -38,7 +38,7 @@ onMounted(() => {
           </div>
         </nav>
       </div>
-    </header>
+    </header> -->
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">

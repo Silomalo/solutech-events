@@ -174,7 +174,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                     <a href="{{ route('tenants.events-manage', $event->id) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">Edit</a>
-                                    {{-- <a href="{{ route('tenants.events-manage', $event->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">View</a> --}}
+                                    <a href="{{ route('tenants.event-attendees', $event->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">Attendees</a>
                                 </td>
                             </tr>
                         @empty

@@ -1,6 +1,6 @@
 <div class="bg-gray-50 dark:bg-transparent min-h-screen py-6">
     @section('title')
-        Users Management
+        Event Attendance
     @endsection
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -8,51 +8,10 @@
             <!-- Header -->
             <div class="flex justify-between items-center px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                   Users Management
+                {{ $event->title }} - Attendees
                 </h1>
-                <div>
-                    <a
-                    {{-- href="{{ route('tenants.users.create') }}" --}}
-                       class="inline-flex items-center px-4 py-2 bg-blue-900 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create New User
-                    </a>
-                </div>
-            </div>
 
-            <!-- Search and Filters -->
-            <div class="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <!-- Search Field -->
-                    <div class="flex-grow">
-                        <label for="search" class="sr-only">Search</label>
-                        <div class="relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <input wire:model.live.debounce.300ms="search" type="text" id="search"
-                                class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
-                                placeholder="Search users by name or email">
-                        </div>
-                    </div>
-                    <!-- User Type Filter -->
-                    <div class="w-full md:w-48">
-                        <label for="user_type" class="sr-only">User Type</label>
-                        <select wire:model.live="userType" id="user_type"
-                            class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
-                            <option value="">All Users</option>
-                            <option value="1">Admin</option>
-                            <option value="2">Staff</option>
-                            <option value="3">User</option>
-                        </select>
-                    </div>
-                </div>
             </div>
-
             <!-- Users List -->
             <div class="overflow-x-auto">
                 @if (session()->has('message'))
@@ -122,7 +81,7 @@
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('created_at')">
                                 <div class="flex items-center space-x-1">
-                                    <span>Created</span>
+                                    <span>Subscribed On</span>
                                     @if($sortField === 'created_at')
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             @if($sortDirection === 'asc')
@@ -134,9 +93,6 @@
                                     @endif
                                 </div>
                             </th>
-                            {{-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Actions
-                            </th> --}}
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
@@ -169,24 +125,13 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $user->created_at->format('M d, Y') }}
+                                    {{ $user->check_in_time->format('M d, Y') }}
                                 </td>
-                                {{-- <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex space-x-2">
-                                        <a href="{{ route('tenants.users.edit', $user->id) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                            Edit
-                                        </a>
-                                        <button wire:click="confirmUserDeletion({{ $user->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </td> --}}
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                    No users found.
-                                    <a href="{{ route('tenants.users.create') }}" class="text-blue-600 hover:underline dark:text-blue-400">Create your first user</a>
+                                    Event Attendees found.
                                 </td>
                             </tr>
                         @endforelse

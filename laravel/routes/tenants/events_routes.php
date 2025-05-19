@@ -1,6 +1,7 @@
 <?php
 use App\Livewire\Tenants\ActivityLog;
 use App\Livewire\Tenants\EventManage;
+use App\Livewire\Tenants\SubscribedUsers;
 use App\Livewire\Tenants\UsersView;
 use App\Livewire\TenantsDashboard;
 use App\Livewire\Tenants\EventsView;
@@ -14,4 +15,5 @@ Route::prefix('account')->middleware([
     Route::get('/users', UsersView::class)->name('tenants.users');
     Route::get('/event/{event_id?}', EventManage::class)->name('tenants.events-manage');
     Route::get('/logs/{event_id?}', ActivityLog::class)->name('tenants.events-logs');
+    Route::get('/attendees/{event_id}', SubscribedUsers::class)->name('tenants.event-attendees');
 });

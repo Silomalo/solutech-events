@@ -9,5 +9,6 @@ export interface OrganizationalType {
     venue: string;
     date: string;
     price: string;
+    is_subscribed?: boolean;
   }[];
 }

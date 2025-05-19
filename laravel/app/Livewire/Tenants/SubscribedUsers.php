@@ -3,12 +3,14 @@
 namespace App\Livewire\Tenants;
 
 use App\Models\User;
+use App\Models\Event;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log;
+use App\Models\Tenants\Attendee;
 
-class UsersView extends Component
+class SubscribedUsers extends Component
 {
+
     use WithPagination;
 
     // Search and filtering properties
@@ -23,6 +25,7 @@ class UsersView extends Component
     // User deletion confirmation
     public $confirmingUserDeletion = false;
     public $userToDelete = null;
+    public $event_id;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -31,6 +34,10 @@ class UsersView extends Component
         'sortDirection' => ['except' => 'asc'],
     ];
 
+    public function mount($event_id)
+    {
+        $this->event_id = $event_id;
+    }
     public function updatingSearch()
     {
         $this->resetPage();
@@ -69,7 +76,7 @@ class UsersView extends Component
 
                 session()->flash('message', "User '$userName' has been deleted successfully.");
             } catch (\Exception $e) {
-                Log::error('Error deleting user: ' . $e->getMessage());
+                // Log::error('Error deleting user: ' . $e->getMessage());
                 session()->flash('error', 'An error occurred while deleting the user.');
             }
 
@@ -77,29 +84,40 @@ class UsersView extends Component
         }
     }
 
+
     public function render()
     {
-        $query = User::query();
+        $query = User::query()
+            ->join('attendees', 'users.id', '=', 'attendees.user_id')
+            ->where('attendees.event_id', $this->event_id)
+            ->select('users.*', 'attendees.check_in_time', 'attendees.event_id');
 
         // Apply search if provided
         if (!empty($this->search)) {
             $query->where(function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
+                $query->where('users.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('users.email', 'like', '%' . $this->search . '%');
             });
         }
 
         // Filter by user type if selected
         if (!empty($this->userType)) {
-            $query->where('user_system_category', $this->userType);
+            $query->where('users.user_system_category', $this->userType);
         }
 
-        // Sort the results
-        $query->orderBy($this->sortField, $this->sortDirection);
+        // Sort the results - need to specify table for ambiguous columns
+        $sortField = $this->sortField;
+        if (in_array($sortField, ['name', 'email', 'user_system_category'])) {
+            $sortField = 'users.' . $sortField;
+        }
+        $query->orderBy($sortField, $this->sortDirection);
 
         // Paginate the results
         $users = $query->paginate($this->pagination);
 
-        return view('livewire.tenants.users-view', compact('users'));
+        $event = Event::find($this->event_id);
+        // dd($event);
+
+        return view('livewire.tenants.subscribed-users', compact('users', 'event'));
     }
 }
