@@ -178,11 +178,7 @@ class TenantManage extends Component
                 // Tenant::createDatabase($this->database_prefix . $this->sub_domain);
                 CreateDatabase::dispatch($this->database_prefix . $this->sub_domain);
             } catch (\Exception $e) {
-                $this->dialog()->error(
-                    $title = 'Error !!!',
-                    $description = 'Error creating tenant, please check your input and  try again',
-                );
-                return;
+                return redirect()->back()->with('error', 'Error creating tenant: ' . $e->getMessage());
             }
 
             return redirect()->route('central.tenants')->with('success', 'Company created successfully');

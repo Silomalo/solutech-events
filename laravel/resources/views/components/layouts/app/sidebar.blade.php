@@ -14,14 +14,15 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                    <flux:navlist.item icon="home" :href="route('central.tenants')" :current="request()->routeIs('central.tenants')" wire:navigate>{{ __('Tenants') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('tenants.users')" :current="request()->routeIs('tenants.users')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
                     <flux:navlist.item icon="home" :href="route('tenants.events')" :current="request()->routeIs('tenants.events')" wire:navigate>{{ __('Events') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('tenants.events-logs')" :current="request()->routeIs('tenants.events-logs')" wire:navigate>{{ __('Logs') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
+            {{-- <flux:navlist variant="outline">
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
                 {{ __('Repository') }}
                 </flux:navlist.item>
@@ -29,7 +30,7 @@
                 <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
                 {{ __('Documentation') }}
                 </flux:navlist.item>
-            </flux:navlist>
+            </flux:navlist> --}}
 
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">

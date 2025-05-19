@@ -90,6 +90,8 @@ class TenantsView extends Component
 
     public function render()
     {
+        // $tenants = Tenant::all();
+        // dd($tenants);
         $tenants = Tenant::where('tenant_name', 'like', '%' . $this->search . '%')
             ->orWhere('tenant_domain', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%')

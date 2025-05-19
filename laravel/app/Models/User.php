@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Traits\UUID;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -60,4 +61,33 @@ class User extends Authenticatable
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
     }
+
+    public static function storePublicFile(string $folder, $file, string $oldFile = null): string
+    {
+        $disk = 'public';
+        if ($oldFile) {
+            self::deletePublicFile($oldFile, $disk);
+        }
+        $originalName = $file->getClientOriginalName();
+        // $extension = $file->getClientOriginalExtension();
+        $fileName = Str::random(5) . "-" . $originalName;
+        try {
+            $path = $file->storeAs($folder, $fileName, $disk);
+            Storage::disk($disk)->url($path);
+        } catch (\Exception $e) {
+            throw new \Exception("Error storing file: " . $e->getMessage());
+        }
+        // return $path;
+        return 'storage/' . $path;
+    }
+
+    public static function deletePublicFile(string $path, string $disk = 'public'): void
+    {// trim storage from path
+        $path = str_replace('storage/', '', $path);
+        if (Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
+        }
+    }
+
+
 }

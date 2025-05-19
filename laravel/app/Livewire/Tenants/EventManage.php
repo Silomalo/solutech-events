@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Tenants;
 
+use App\Models\User;
+use App\Models\Event;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\Event;
+use App\Models\Tenants\ActivityLog;
 use Illuminate\Support\Facades\Storage;
 
 class EventManage extends Component
@@ -51,6 +53,7 @@ class EventManage extends Component
             $this->price = $event->price;
             $this->max_attendees = $event->max_attendees;
             $this->cover_image = $event->cover_image;
+            $this->temp_cover_image = $event->cover_image;
             $this->status = $event->status;
         }
     }
@@ -58,22 +61,12 @@ class EventManage extends Component
     public function save()
     {
         $this->validate();
-
-        // Combine date and time
         $dateTime = $this->date . ' ' . $this->time . ':00';
 
-        // Handle image upload
-        $coverImagePath = $this->cover_image;
-        if ($this->temp_cover_image) {
-            // Store the image in the public disk
-            $coverImagePath = $this->temp_cover_image->store('events', 'public');
-
-            // Remove old image if this is an update
-            if ($this->event_id && $this->cover_image) {
-                Storage::disk('public')->delete($this->cover_image);
-            }
+        $image_url = $this->temp_cover_image;
+        if ($this->cover_image && ($this->cover_image != $this->temp_cover_image)) {
+            $image_url = User::storePublicFile('events', $this->cover_image, $this->temp_cover_image);
         }
-
         // Create or update event
         $event = $this->event_id ? Event::find($this->event_id) : new Event();
 
@@ -83,14 +76,17 @@ class EventManage extends Component
         $event->date = $dateTime;
         $event->price = $this->price;
         $event->max_attendees = $this->max_attendees;
-        $event->cover_image = $coverImagePath;
+        $event->cover_image = $image_url;
         $event->status = $this->status;
-
         $event->save();
+
+        $message = $this->title;
+        $action = $this->event_id ? 'updating_event' : 'creating_event';
+        ActivityLog::createLog(auth()->id(), $this->event_id ? $this->event_id : 0, $action, $message);
 
         // Redirect or show success message
         session()->flash('message', $this->event_id ? 'Event updated successfully!' : 'Event created successfully!');
-        return redirect()->route('tenant.events');
+        return redirect()->route('tenants.events');
     }
 
     public function clearImage()

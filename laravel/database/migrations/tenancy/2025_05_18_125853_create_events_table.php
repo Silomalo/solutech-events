@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('price', 10, 2);
             $table->integer('max_attendees');
-            $table->boolean('status')->default(true);
+            $table->string('status')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

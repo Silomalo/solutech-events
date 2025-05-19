@@ -1,4 +1,4 @@
-<div class="bg-gray-50 dark:bg-gray-900 min-h-screen py-6">
+<div class="bg-gray-50 dark:bg-transparent min-h-screen py-6">
     @section('title')
         {{ $event_id ? 'Update Event' : 'Create Event' }}
     @endsection
@@ -28,7 +28,7 @@
                         <div class="col-span-2">
                             <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event Title</label>
                             <input type="text" id="title" wire:model="title"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                                class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                                 placeholder="Enter event title">
                             @error('title')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -39,61 +39,48 @@
 
                         <!-- Event Cover Image -->
                         <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event Cover Image</label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md bg-white dark:bg-gray-800">
-                                @if ($temp_cover_image)
-                                    <div class="relative w-full flex items-center justify-center">
-                                        <img src="{{ $temp_cover_image->temporaryUrl() }}"
-                                            class="max-h-64 object-contain" alt="event-cover">
-
-                                        <button type="button" wire:click="clearImage"
-                                            class="absolute top-0 right-0 p-1 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                @elseif ($cover_image)
-                                    <div class="relative w-full flex items-center justify-center">
-                                        <img src="{{ Storage::url($cover_image) }}"
-                                            class="max-h-64 object-contain" alt="event-cover">
-
-                                        <button type="button" wire:click="clearImage"
-                                            class="absolute top-0 right-0 p-1 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                            <div class="col-span-1 md:col-span-2">
+                                @if ($temp_cover_image == null)
+                                    <div class="flex items-center justify-center w-full">
+                                        <x-fileUpload :model="'cover_image'" acceptedTypes="image/*"
+                                            label="Upload Company Logo" />
                                     </div>
                                 @else
-                                    <div class="space-y-1 text-center">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        <div class="flex text-sm text-gray-600 dark:text-gray-400">
-                                            <label for="temp_cover_image" class="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 focus-within:outline-none">
-                                                <span>Upload a file</span>
-                                                <input id="temp_cover_image" type="file" class="sr-only" wire:model="temp_cover_image">
-                                            </label>
-                                            <p class="pl-1">or drag and drop</p>
+                                    <div class="relative h-32 p-2 overflow-hidden border md:col-span-1 group rounded-2xl border-opacity-30">
+
+                                        <img src="{{ asset($temp_cover_image) }}"
+                                            class="object-contain " width="200px"
+                                            height="auto" alt="company-logo">
+
+                                        <!-- Delete Button -->
+                                        <div class="absolute z-10 top-2 left-2">
+                                            <div wire:click="clearField('temp_cover_image')"
+                                                class="p-2 bg-white rounded-full shadow-lg hover:bg-red-600 group-hover:bg-customDanger">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </div>
                                         </div>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 2MB</p>
                                     </div>
                                 @endif
+
                             </div>
-                            @error('temp_cover_image')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                            @error('cover_image')
+                                <span class="error">
                                     {{ $message }}
-                                </p>
+                                </span>
                             @enderror
                         </div>
+
 
                         <!-- Event Description -->
                         <div class="col-span-2">
                             <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                             <textarea id="description" rows="5" wire:model="description"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                                class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                                 placeholder="Describe your event"></textarea>
                             @error('description')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -106,7 +93,7 @@
                         <div>
                             <label for="venue" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Venue</label>
                             <input type="text" id="venue" wire:model="venue"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                                class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                                 placeholder="Event location">
                             @error('venue')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -120,7 +107,7 @@
                             <div>
                                 <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date</label>
                                 <input type="date" id="date" wire:model="date"
-                                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
+                                    class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
                                 @error('date')
                                     <p class="mt-2 text-sm text-red-600 dark:text-red-400">
                                         {{ $message }}
@@ -130,7 +117,7 @@
                             <div>
                                 <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time</label>
                                 <input type="time" id="time" wire:model="time"
-                                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
+                                    class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
                                 @error('time')
                                     <p class="mt-2 text-sm text-red-600 dark:text-red-400">
                                         {{ $message }}
@@ -147,7 +134,7 @@
                                     <span class="text-gray-500 dark:text-gray-400 sm:text-sm">KES</span>
                                 </div>
                                 <input type="number" id="price" wire:model="price" step="0.01" min="0"
-                                    class="pl-12 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                                    class="pl-12 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                                     placeholder="0.00">
                             </div>
                             @error('price')
@@ -161,7 +148,7 @@
                         <div>
                             <label for="max_attendees" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Max Attendees</label>
                             <input type="number" id="max_attendees" wire:model="max_attendees" min="1"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                                class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
                                 placeholder="Maximum number of attendees">
                             @error('max_attendees')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -174,7 +161,7 @@
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
                             <select id="status" wire:model="status"
-                                class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
+                                class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
                                 <option value="active">Active</option>
                                 <option value="postponed">Postponed</option>
                                 <option value="cancelled">Cancelled</option>

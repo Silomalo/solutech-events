@@ -13,7 +13,6 @@ class TenancySeeder extends Seeder
     public function run(): void
     {
         $this->call([
-
             UsersSeeder::class,
         ]);
     }

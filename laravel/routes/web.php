@@ -1,10 +1,12 @@
 <?php
 
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Settings\Password;
+use Illuminate\Support\Facades\Auth;
+use App\Livewire\Settings\Appearance;
 use Illuminate\Support\Facades\Route;
 
+// Auth::routes(['register' => false]);
 Route::get('/', function () {
     return view('welcome');
 })->name('home');

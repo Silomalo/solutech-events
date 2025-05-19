@@ -12,7 +12,7 @@
                 </h1>
                 <div>
                     <a href="{{ route('tenants.events-manage') }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-700 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition">
+                       class="inline-flex items-center px-4 py-2 bg-blue-900 border border-transparent rounded-md font-semibold text-sm text-white hover:bg-blue-800  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -42,7 +42,7 @@
                     <div class="w-full md:w-48">
                         <label for="status" class="sr-only">Status</label>
                         <select wire:model.live="status" id="status"
-                            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
+                            class="mt-1 p-2 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md">
                             <option value="">All Statuses</option>
                             <option value="active">Active</option>
                             <option value="cancelled">Cancelled</option>
@@ -135,7 +135,10 @@
                                     <div class="flex items-center">
                                         @if($event->cover_image)
                                             <div class="flex-shrink-0 h-10 w-10 mr-3">
-                                                <img class="h-10 w-10 rounded-full object-cover" src="{{ Storage::url($event->cover_image) }}" alt="Event Cover">
+                                                {{-- <img class="h-10 w-10 rounded-full object-cover" src="{{ Storage::url($event->cover_image) }}" alt="Event Cover"> --}}
+                                                <img src="{{ asset($event->cover_image) }}"
+                                                class="object-contain " width="200px"
+                                                height="auto" alt="company-logo">
                                             </div>
                                         @else
                                             <div class="flex-shrink-0 h-10 w-10 mr-3 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -151,7 +154,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $event->date->format('M d, Y g:i A') }}
+                                    {{-- {{ $event->date->format('M d, Y g:i A') }} --}}
+                                    {{ \Carbon\Carbon::parse($event->date)->format('M d, Y g:i A') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $event->venue }}
@@ -169,8 +173,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                    <a href="{{ route('tenant.events.edit', $event->id) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">Edit</a>
-                                    <a href="{{ route('tenant.events.show', $event->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">View</a>
+                                    <a href="{{ route('tenants.events-manage', $event->id) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">Edit</a>
+                                    {{-- <a href="{{ route('tenants.events-manage', $event->id) }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">View</a> --}}
                                 </td>
                             </tr>
                         @empty
