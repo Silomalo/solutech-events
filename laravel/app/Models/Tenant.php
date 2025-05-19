@@ -117,8 +117,7 @@ class Tenant extends Model
             return $domainData;
         } else {
             // dd($tenant_subdomain);
-            $subdomain = $tenant_subdomain ? $tenant_subdomain : 'no found';
-            $domainData = Tenant::where('tenant_domain', $subdomain)->where('status', true)->first();
+            $domainData = Tenant::where('tenant_domain', $tenant_subdomain)->where('status', true)->first();
             // dd($domainData);
             if (!$domainData) {
                 return redirect(self::getFullDomainProperty());
