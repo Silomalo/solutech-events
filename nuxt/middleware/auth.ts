@@ -1,6 +1,7 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const authCookie = useCookie('auth_token');
-  
+  // console.log('Auth Middleware:', authCookie.value);
+  // console.log("Navigating to:", to.path.startsWith("/account"));
   // If user is not authenticated and trying to access a protected route
   if (!authCookie.value && to.path.startsWith('/account')) {
     return navigateTo('/login');

@@ -1,0 +1,9 @@
+.git
+.idea
+node_modules
+.nuxt
+.output
+.env
+.DS_Store
+docker-compose.yml
+Dockerfile

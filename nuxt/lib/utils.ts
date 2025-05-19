@@ -18,3 +18,11 @@ export function getSubdomain(){
     return null;
     
 }
+// append sub-domain to url = useRuntimeConfig().public.apiUrl
+export function getAPIUrl() {
+  const subdomain = getSubdomain();
+    const api_url = useRuntimeConfig().public.apiUrl;
+    const [protocol, domain] = api_url.split("//");
+    const subdomain_url = `${protocol}//${subdomain}.${domain}`;
+    return subdomain_url;
+}

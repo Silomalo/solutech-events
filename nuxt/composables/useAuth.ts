@@ -1,5 +1,6 @@
 import { useRuntimeConfig } from "nuxt/app";
 import { ref, computed } from "vue";
+import { getAPIUrl } from "~/lib/utils";
 
 export const useAuth = () => {
   const user = ref<any>(null);
@@ -21,9 +22,7 @@ export const useAuth = () => {
         return false;
       }
 
-      // Get user data from API
-      const url = useRuntimeConfig().public.apiUrl;
-      user.value = await $fetch(`${url}/api/user`, {
+      user.value = await $fetch(`${getAPIUrl()}/api/user`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -58,12 +57,14 @@ export const useAuth = () => {
       isLoading.value = true;
       error.value = null;
 
-      const url = useRuntimeConfig().public.apiUrl;
-      const response = await $fetch<{ token: string }>(`${url}/api/login`, {
-        method: "POST",
-        body: { email, password },
-        credentials: "include",
-      });
+      const response = await $fetch<{ token: string }>(
+        `${getAPIUrl()}/api/login`,
+        {
+          method: "POST",
+          body: { email, password },
+          credentials: "include",
+        }
+      );
 
       // Set auth token in cookie
       if (response.token) {
@@ -97,8 +98,7 @@ export const useAuth = () => {
 
       const token = useCookie("auth_token").value;
       if (token) {
-        const url = useRuntimeConfig().public.apiUrl;
-        await $fetch(`${url}/api/logout`, {
+        await $fetch(`${getAPIUrl()}/api/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,11 +132,13 @@ export const useAuth = () => {
       isLoading.value = true;
       error.value = null;
 
-      const url = useRuntimeConfig().public.apiUrl;
-      const response = await $fetch<{ token?: string }>(`${url}/api/register`, {
-        method: "POST",
-        body: userData,
-      });
+      const response = await $fetch<{ token?: string }>(
+        `${getAPIUrl()}/api/register`,
+        {
+          method: "POST",
+          body: userData,
+        }
+      );
 
       // Set auth token in cookie if API returns token after registration
       if (response.token) {
@@ -177,8 +179,7 @@ export const useAuth = () => {
       isLoading.value = true;
       error.value = null;
 
-      const url = useRuntimeConfig().public.apiUrl;
-      await $fetch(`${url}/api/forgot-password`, {
+      await $fetch(`${getAPIUrl()}/api/forgot-password`, {
         method: "POST",
         body: { email },
       });
@@ -206,8 +207,7 @@ export const useAuth = () => {
       isLoading.value = true;
       error.value = null;
 
-      const url = useRuntimeConfig().public.apiUrl;
-      await $fetch(`${url}/api/reset-password`, {
+      await $fetch(`${getAPIUrl()}/api/reset-password`, {
         method: "POST",
         body: resetData,
       });

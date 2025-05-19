@@ -1,4 +1,3 @@
-
 export interface OrganizationalType {
   id: number;
   tenant_name: string;
@@ -9,6 +8,7 @@ export interface OrganizationalType {
     venue: string;
     date: string;
     price: string;
+    description?: string; // Added description field
     is_subscribed?: boolean;
   }[];
 }

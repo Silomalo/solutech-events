@@ -1,25 +1,117 @@
 <script setup lang="ts">
 import type { OrganizationalType } from '~/lib/types'
-import { generateUrl, getSubdomain } from '~/lib/utils'
+import { generateUrl, getAPIUrl, getSubdomain } from '~/lib/utils'
 const authCookie = useCookie('auth_token');
 const isAuthenticated = computed(() => !!authCookie.value);
 
 const url = useRuntimeConfig().public.apiUrl
 const subdomain = getSubdomain()
 // const { data, error, status } = await useFetch<OrganizationalType[]>(url + '/api/organizations')
-const { data, error, status } = await useFetch<OrganizationalType[]>(
+const { data, error, status,refresh } = await useFetch<OrganizationalType[]>(
     subdomain ? `${url}/api/organizations/${subdomain}` : `${url}/api/organizations`
 )
 if (error.value) {
     console.error('Error fetching events:', error.value)
     // return
 }
-// console.log('data', data.value)
+onMounted(() => {
+//    if(!data.value && status.value !== 'pending') {
+//         refresh()
+//     }
+    refresh()
+})
+
+// Dialog state
+const isDialogOpen = ref(false)
+const selectedEvent = ref<{
+    id: number;
+    title: string;
+    description?: string;
+    venue: string;
+    date: string;
+    price: string;
+} | null>(null)
+
+// Open the dialog with event details
+const openEventDialog = (event: any) => {
+    selectedEvent.value = event
+    isDialogOpen.value = true
+}
+
+// Close the dialog
+const closeEventDialog = () => {
+    isDialogOpen.value = false
+    selectedEvent.value = null
+}
+
+// Handle event subscription
+const subscribing = ref(false)
+const subscriptionError = ref('')
+const subscriptionSuccess = ref('')
+
+const attendEvent = async (eventId: number) => {
+    if (!isAuthenticated.value) return
+    
+    try {
+        subscribing.value = true
+        subscriptionError.value = ''
+        subscriptionSuccess.value = ''
+        
+        // Explicitly set the token to ensure proper authentication
+        // const token = useCookie('auth_token').value
+        // if (!token) {
+        //     subscriptionError.value = 'You must be logged in to attend events'
+        //     return
+        // }
+        
+        const response = await $fetch(`${getAPIUrl()}/api/subscribe/${eventId}`, {
+            method: 'POST',
+            headers: {
+                // 'Authorization': `Bearer ${authCookie.value}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        
+        subscriptionSuccess.value = 'Successfully subscribed to event!'
+        
+        // Reload the page after a brief delay to show success message
+        setTimeout(() => {
+            // window.location.reload()
+        }, 1500)
+    } catch (err: any) {
+        console.error('Event subscription error:', err)
+        subscriptionError.value = err?.response?._data?.message || 'Failed to subscribe to the event. Please try again.'
+    } finally {
+        subscribing.value = false
+    }
+}
+const fetchUser= async () => {
+    try {
+        const response = await $fetch(`${getAPIUrl()}/api/user`, {
+            method: 'GET',
+            // headers: {
+            //     'Authorization': `Bearer ${authCookie.value}`
+            // }
+        })
+        console.log('User data:', response)
+    } catch (error) {
+        console.error('Error fetching user data:', error)
+    }
+}
 </script>
 
 <template>
     <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 min-h-[85vh]">
+<!-- <pre>
+    {{ data }}
+</pre>
+<div>
 
+    <button @click="fetchUser" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md">
+        Fetch User Data
+    </button>
+</div> -->
         <!-- Loading State -->
         <div v-if="status === 'pending'" class="flex justify-center py-12">
             <div class="animate-pulse flex space-x-4">
@@ -50,6 +142,39 @@ if (error.value) {
                     <div class="mt-2 text-sm text-red-700">
                         <p>{{ error }}</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription notification -->
+        <div v-if="subscriptionSuccess" class="rounded-md bg-green-50 p-4 my-2">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ subscriptionSuccess }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="subscriptionError" class="rounded-md bg-red-50 p-4 my-2">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{ subscriptionError }}</p>
                 </div>
             </div>
         </div>
@@ -112,23 +237,24 @@ if (error.value) {
                                             <span class="font-bold text-[var(--color-secondary)] text-lg">KES. {{
                                                 event.price
                                                 }}</span>
-                                            <button
+                                            <button @click="openEventDialog(event)"
                                                 class="px-3 py-1 bg-[var(--color-primary)] text-white rounded-md text-sm hover:bg-opacity-90 transition-colors">
                                                 View Details
                                             </button>
                                             <div v-if="isAuthenticated">
-                                                <button v-if="!event.is_subscribed"
-                                                    class="px-3 py-1 bg-[var(--color-secondary)] animate-pulse text-white rounded-md text-sm hover:bg-opacity-90 transition-colors">
-                                                    Attend Event
+                                                <button v-if="!event.is_subscribed" @click="attendEvent(event.id)"
+                                                    :disabled="subscribing"
+                                                    class="px-3 py-1 bg-[var(--color-secondary)] text-white rounded-md text-sm hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    {{ subscribing ? 'Processing...' : 'Attend Event' }}
                                                 </button>
-                                                <button v-else
+                                                <button v-else @click="attendEvent(event.id)" :disabled="subscribing"
                                                     class="px-3 py-1 bg-gray-300 text-green-500 animate-pulse rounded-md text-sm cursor-not-allowed">
                                                     Attending
                                                 </button>
                                             </div>
                                             <div v-else>
-                                                <NuxtLink :to="generateUrl(org.tenant_domain)"
-                                                    target="_blank" rel="noopener noreferrer"
+                                                <NuxtLink :to="generateUrl(org.tenant_domain)" target="_blank"
+                                                    rel="noopener noreferrer"
                                                     class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-opacity-90 transition-colors">
                                                     Login to Attend
                                                 </NuxtLink>
@@ -162,6 +288,73 @@ if (error.value) {
                             </NuxtLink>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Details Dialog -->
+        <div v-if="isDialogOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden transform transition-all">
+                <!-- Dialog header -->
+                <div class="bg-[var(--color-primary)] px-4 py-3 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-white">Event Details</h3>
+                    <button @click="closeEventDialog" class="text-white hover:text-gray-200 focus:outline-none">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Dialog content -->
+                <div class="p-6">
+                    <div v-if="selectedEvent">
+                        <h4 class="text-xl font-bold text-[var(--color-primary)] mb-2">{{ selectedEvent.title }}</h4>
+
+                        <div class="mt-4 flex items-center text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="font-medium">{{ selectedEvent.venue }}</span>
+                        </div>
+
+                        <div class="mt-2 flex items-center text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>{{ selectedEvent.date }}</span>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5 class="font-medium text-gray-700">Description:</h5>
+                            <p class="mt-2 text-gray-600">
+                                {{ selectedEvent.description || 'No detailed description available for this event.' }}
+                            </p>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-[var(--color-secondary)] text-lg">
+                                    KES. {{ selectedEvent.price }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialog footer -->
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="closeEventDialog"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[var(--color-primary)] text-base font-medium text-white hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>

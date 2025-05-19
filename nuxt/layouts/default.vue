@@ -56,7 +56,7 @@ async function handleLogout() {
           </NuxtLink>
           <div class="flex space-x-6">
             <template v-if="isAuthenticated">
-              <NuxtLink to="/my-events" class="text-sm font-medium text-[var(--color-tertiary)] hover:text-opacity-80 px-3 py-2 rounded-md">
+              <NuxtLink to="/" class="text-sm font-medium text-[var(--color-tertiary)] hover:text-opacity-80 px-3 py-2 rounded-md">
                 My Events
               </NuxtLink>
               <NuxtLink to="/account" class="text-sm font-medium text-[var(--color-tertiary)] hover:text-opacity-80 px-3 py-2 rounded-md">

@@ -10,6 +10,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::POST('/subscribe/{event_id}', [APIController::class, 'toggleEventSubscription'])->name('event.subscribe')->middleware('auth:sanctum');
+
 Route::POST('/login', [APIController::class, 'login'])->name('login');
 Route::POST('/register', [APIController::class, 'register'])->name('register');
 Route::get('/organizations/{domain?}', [APIController::class, 'getOrganizations'])->name('organizations');
