@@ -27,7 +27,7 @@ echo "Optimizing application..."
 php artisan optimize:clear
 php artisan optimize
 
-# Build assets 
+# Build assets
 echo "Building frontend assets..."
 npm run build
 
