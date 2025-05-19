@@ -11,6 +11,8 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::POST('/subscribe/{event_id}', [APIController::class, 'toggleEventSubscription'])->name('event.subscribe')->middleware('auth:sanctum');
+// Route::GET('/subscription/{eventId}', [APIController::class, 'checkEventSubscription'])->name('event.subscription.status')->middleware('auth:sanctum');
+Route::GET('/subscribed-events', [APIController::class, 'subscriptionEventIds'])->name('event.subscription.id')->middleware('auth:sanctum');
 
 Route::POST('/login', [APIController::class, 'login'])->name('login-api');
 Route::POST('/register', [APIController::class, 'register'])->name('register-api');

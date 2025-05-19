@@ -132,6 +132,10 @@ class Tenant extends Model
 
     public static function switchingDBConnection($db_name)
     {
+        if (empty($db_name)) {
+            throw new \Exception("Database name cannot be empty");
+        }
+
         // dd($db_name);
         $cacheKey = self::$cachePrefix . $db_name;
         // Cache only the configuration, not the connection name
@@ -139,37 +143,65 @@ class Tenant extends Model
             return self::getConnectionConfig($db_name);
         });
 
+        // Also update the 'tenant' connection to use this database
+        Config::set("database.connections.tenant.database", $db_name);
+
         // Set the configuration for this unique connection
         Config::set("database.connections.{$db_name}", $config);
 
         // Establish a new connection
         DB::purge($db_name);
+        DB::purge('tenant');
+
+        // Try to connect using the database name as connection
         $connection = DB::connection($db_name);
         try {
             $connection->getPdo();
+
+            // Set as default connection
+            DB::setDefaultConnection($db_name);
+
+            return $connection;
         } catch (\Exception $e) {
             // Handle connection error
-            info("Failed to connect to database: {$e->getMessage()}");
+            info("Failed to connect to database {$db_name}: {$e->getMessage()}");
+
+            // Try the 'tenant' connection as a fallback
+            try {
+                $tenantConnection = DB::connection('tenant');
+                $tenantConnection->getPdo();
+
+                // Set tenant as default connection
+                DB::setDefaultConnection('tenant');
+
+                return $tenantConnection;
+            } catch (\Exception $e2) {
+                info("Failed to connect to tenant database: {$e2->getMessage()}");
+                throw $e2;
+            }
         }
-
-        // Set as default connection
-        DB::setDefaultConnection($db_name);
-
-        return $connection;
     }
 
     private static function getConnectionConfig($db_name)
     {
+        // Always ensure we have a driver, defaulting to 'pgsql' if not provided
+        // Since DB_CONNECTION is the standard Laravel env var for the driver,
+        // we check both DB_DRIVER and DB_CONNECTION
+        $driver = env('DB_DRIVER') ?? env('DB_CONNECTION', 'pgsql');
+
         return [
+            'driver' => $driver, // Ensure driver is always defined
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => $db_name,
             'username' => env('DB_USERNAME', 'postgres'),
             'password' => env('DB_PASSWORD', ''),
-            'driver' => env('DB_DRIVER', 'pgsql'),
             'charset' => env('DB_CHARSET', 'utf8'),
             'collation' => env('DB_COLLATION', 'utf8_unicode_ci'),
             'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
             'strict' => false,
             'engine' => null,
         ];

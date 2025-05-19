@@ -35,7 +35,7 @@ class EventManage extends Component
         'time' => 'required',
         'price' => 'required|numeric|min:0',
         'max_attendees' => 'required|integer|min:1',
-        'temp_cover_image' => 'nullable|image|max:2048', // 2MB max
+        // 'temp_cover_image' => 'nullable|image|max:2048', // 2MB max
         'status' => 'required|in:active,cancelled,completed,postponed',
     ];
 

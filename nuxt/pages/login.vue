@@ -31,7 +31,8 @@ async function handleLogin() {
   
   if (success) {
     // Redirect to dashboard or home page
-    router.push('/account');
+    // router.push('/account');
+    router.push('/');
   }
 }
 

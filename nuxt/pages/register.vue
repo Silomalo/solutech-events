@@ -4,12 +4,11 @@ import { useAuth } from '~/composables/useAuth';
 const router = useRouter();
 
 // Get auth composable
-const { register, error: authError, isLoading } = useAuth();
-
-// Form state
+const { register, error: authError, isLoading } = useAuth();  // Form state
 const form = reactive({
   name: '',
   email: '',
+  phone: '', // Added phone field
   password: '',
   password_confirmation: '',
   agree_terms: false
@@ -31,6 +30,12 @@ function validateForm() {
     newErrors.email = 'Email is required';
   } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
     newErrors.email = 'Please enter a valid email address';
+  }
+  
+  if (!form.phone) {
+    newErrors.phone = 'Phone number is required';
+  } else if (!/^\+?\d{10,15}$/.test(form.phone)) {
+    newErrors.phone = 'Please enter a valid phone number';
   }
   
   if (!form.password) {
@@ -61,6 +66,7 @@ async function handleRegister() {
   const userData = {
     name: form.name,
     email: form.email,
+    phone: form.phone,
     password: form.password,
     password_confirmation: form.password_confirmation
   };
@@ -69,7 +75,8 @@ async function handleRegister() {
   
   if (result === true) {
     // Redirect to account page or onboarding
-    router.push('/account');
+    // router.push('/account');
+    router.push('/');
   } else if (typeof result === 'object' && result.validationErrors) {
     // Handle validation errors from Laravel
     Object.keys(result.validationErrors).forEach(key => {
@@ -147,6 +154,26 @@ async function handleRegister() {
                 placeholder="john.doe@example.com"
               />
               <p v-if="errors.email" class="mt-2 text-sm text-red-600">{{ errors.email }}</p>
+            </div>
+          </div>
+
+          <!-- Phone input -->
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700">
+              Phone number
+            </label>
+            <div class="mt-1">
+              <input 
+                id="phone" 
+                name="phone" 
+                type="tel" 
+                autocomplete="tel" 
+                required 
+                v-model="form.phone"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] sm:text-sm"
+                placeholder="+2547XXXXXXXX"
+              />
+              <p v-if="errors.phone" class="mt-2 text-sm text-red-600">{{ errors.phone }}</p>
             </div>
           </div>
 

@@ -96,6 +96,7 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
+
         'tenant' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
@@ -113,7 +114,6 @@ return [
                 'add_extra_option' => '--format=c', // and any other pg_dump flags
             ]
         ],
-
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',

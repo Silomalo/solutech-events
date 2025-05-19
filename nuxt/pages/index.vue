@@ -6,19 +6,60 @@ const isAuthenticated = computed(() => !!authCookie.value);
 
 const url = useRuntimeConfig().public.apiUrl
 const subdomain = getSubdomain()
-// const { data, error, status } = await useFetch<OrganizationalType[]>(url + '/api/organizations')
-const { data, error, status,refresh } = await useFetch<OrganizationalType[]>(
+
+// Store subscribed event IDs
+const subscribedEventIds = ref<number[]>([]);
+const loadingSubscriptions = ref(false);
+
+// Fetch events data
+const { data, error, status, refresh } = await useFetch<OrganizationalType[]>(
     subdomain ? `${url}/api/organizations/${subdomain}` : `${url}/api/organizations`
 )
 if (error.value) {
     console.error('Error fetching events:', error.value)
     // return
 }
+
+// Fetch subscribed events
+const fetchSubscribedEvents = async () => {
+    if (!isAuthenticated.value) return;
+    
+    try {
+        loadingSubscriptions.value = true;
+        const response = await $fetch(`${getAPIUrl()}/api/subscribed-events`, {
+            method: 'GET'
+        });
+        
+        // Handle the nested array structure [[2], [3]] -> [2, 3]
+        if (Array.isArray(response) && response.length > 0) {
+            subscribedEventIds.value = response.flat().map(id => Number(id));
+            
+            // Update is_subscribed status for all events
+            updateSubscriptionStatus();
+        }
+    } catch (err) {
+        console.error('Error fetching subscribed events:', err);
+    } finally {
+        loadingSubscriptions.value = false;
+    }
+};
+
+// Update subscription status for all events based on subscribedEventIds
+const updateSubscriptionStatus = () => {
+    if (!data.value) return;
+    
+    data.value.forEach(org => {
+        if (org.events && org.events.length > 0) {
+            org.events.forEach(event => {
+                event.is_subscribed = subscribedEventIds.value.includes(event.id);
+            });
+        }
+    });
+};
+
 onMounted(() => {
-//    if(!data.value && status.value !== 'pending') {
-//         refresh()
-//     }
-    refresh()
+    refresh();
+    fetchSubscribedEvents();
 })
 
 // Dialog state
@@ -57,28 +98,33 @@ const attendEvent = async (eventId: number) => {
         subscriptionError.value = ''
         subscriptionSuccess.value = ''
         
-        // Explicitly set the token to ensure proper authentication
-        // const token = useCookie('auth_token').value
-        // if (!token) {
-        //     subscriptionError.value = 'You must be logged in to attend events'
-        //     return
-        // }
-        
         const response = await $fetch(`${getAPIUrl()}/api/subscribe/${eventId}`, {
             method: 'POST',
             headers: {
-                // 'Authorization': `Bearer ${authCookie.value}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         })
         
+        // Update local subscription status without page reload
+        if (data.value) {
+            data.value.forEach(org => {
+                if (org.events && org.events.length > 0) {
+                    org.events.forEach(event => {
+                        if (event.id === eventId) {
+                            event.is_subscribed = true;
+                        }
+                    });
+                }
+            });
+        }
+        
         subscriptionSuccess.value = 'Successfully subscribed to event!'
         
-        // Reload the page after a brief delay to show success message
+        // Clear success message after a delay
         setTimeout(() => {
-            // window.location.reload()
-        }, 1500)
+            subscriptionSuccess.value = '';
+        }, 2000)
     } catch (err: any) {
         console.error('Event subscription error:', err)
         subscriptionError.value = err?.response?._data?.message || 'Failed to subscribe to the event. Please try again.'
@@ -86,32 +132,46 @@ const attendEvent = async (eventId: number) => {
         subscribing.value = false
     }
 }
-const fetchUser= async () => {
+const refreshSubscribedEvents = async () => {
     try {
-        const response = await $fetch(`${getAPIUrl()}/api/user`, {
-            method: 'GET',
-            // headers: {
-            //     'Authorization': `Bearer ${authCookie.value}`
-            // }
-        })
-        console.log('User data:', response)
+        const response = await $fetch(`${getAPIUrl()}/api/subscribed`, {
+            method: 'GET'
+        });
+        
+        // Handle the nested array structure [[2], [3]] -> [2, 3]
+        if (Array.isArray(response) && response.length > 0) {
+            // Extract the event IDs and update event subscription status
+            const subscribedIds = response.flat().map(id => Number(id));
+            
+            // Update is_subscribed status for all events
+            if (data.value) {
+                data.value.forEach(org => {
+                    if (org.events && org.events.length > 0) {
+                        org.events.forEach(event => {
+                            event.is_subscribed = subscribedIds.includes(event.id);
+                        });
+                    }
+                });
+            }
+            console.log('Subscribed events:', subscribedIds);
+        }
     } catch (error) {
-        console.error('Error fetching user data:', error)
+        console.error('Error fetching subscribed events data:', error)
     }
 }
 </script>
 
 <template>
     <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 min-h-[85vh]">
-<!-- <pre>
+<!-- Debug buttons (hidden in production) -->
+<!-- <pre class="text-xs overflow-auto max-h-40 bg-gray-100 p-2 rounded">
     {{ data }}
-</pre>
-<div>
-
-    <button @click="fetchUser" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md">
-        Fetch User Data
+</pre> -->
+<div class="mb-4">
+    <button @click="refreshSubscribedEvents" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-opacity-90">
+        Refresh Event Status
     </button>
-</div> -->
+</div>
         <!-- Loading State -->
         <div v-if="status === 'pending'" class="flex justify-center py-12">
             <div class="animate-pulse flex space-x-4">

@@ -82,24 +82,6 @@ class TenantManage extends Component
     {
         $this->$field = null;
     }
-    // public function post()
-    // {
-    //     // use a full syntax
-    //     $this->dialog()->confirm([
-    //         'title' => 'Are you Sure?',
-    //         'description' => 'This is very sensitive operation, are you sure you want to continue ?',
-    //         'icon' => 'error',
-    //         'accept' => [
-    //             'label' => 'Yes, continue',
-    //             'method' => 'writeToDB',
-    //             'params' => '',
-    //         ],
-    //         'reject' => [
-    //             'label' => 'No, cancel',
-    //             'method' => '',
-    //         ],
-    //     ]);
-    // }
     public function post()
     {
         $this->validate([

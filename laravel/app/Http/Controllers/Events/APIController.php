@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Tenants\ActivityLog;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 
@@ -29,14 +30,22 @@ class APIController extends Controller
     public function register(Request $request)
     {
         // Handle registration logic here
-        $data = $request->only('name', 'email', 'password');
+        // $data = $request->only('name', 'email', 'password', 'phone');
+        $data = [
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => password_hash($request->input('password'), PASSWORD_BCRYPT),
+            'phone' => $request->input('phone'),
+            'user_system_category' => 3,
+        ];
         //check if email already exists
-        $existingUser = User::where('email', $data['email'])->first();
+        $existingUser = User::where('email', $request->input('email'))->first();
         if ($existingUser) {
-            return response()->json(['message' => 'Email already exists'], 409);
+            return response()->json(['message' => 'Email already exists, try another one!'], 409);
         }
 
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        // $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        // $data['user_system_category'] = 3;
         $user = User::create($data);
         $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json(['token' => $token], 201);
@@ -91,53 +100,54 @@ class APIController extends Controller
         return response()->json($organizations);
     }
 
-    // public function getOrganizations(Request $request, $domain = null)
-    // {
+    public function subscriptionEventIds()
+    {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized Joe'], 401);
+        }
 
-    //     $organizations = [];
-    //     if($domain){
-    //         $organizations = Tenant::select('id', 'tenant_name', 'database_name','tenant_domain')->where('tenant_domain', $domain)->get();
-    //     }else{
-    //         $organizations = Tenant::select('id', 'tenant_name', 'database_name','tenant_domain')->get();
-    //     }
+        $userId = auth()->user()->id;
+        $subscribedEventIds = DB::table('attendees')
+            ->where('user_id', $userId)
+            ->pluck('event_id')
+            ->toArray();
 
-    //     foreach ($organizations as $organization) {
-    //         Tenant::switchingDBConnection($organization->database_name);
-    //         // Fetch events from the tenant's database
-    //         $events = DB::table('events')->select('id', 'description', 'title', 'venue', 'date', 'price')->get();
+        return response()->json([$subscribedEventIds]);
+    }
 
-    //         //if user is logged in take auth user id and check attendees table to see is the user is subscribed to the event
-    //         if (auth()->check()) {
-    //             $userId = auth()->user()->id;
-    //             foreach ($events as $event) {
-    //                 $event->is_subscribed = DB::table('attendees')->where('event_id', $event->id)->where('user_id', $userId)->exists();
-    //             }
-    //         }
-    //         $organization->events = $events;
-    //     }
-
-    //     return response()->json($organizations);
-    // }
 
     public function toggleEventSubscription($event_id)
     {
-        if (auth()->check()) {
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Unauthorized Joe'], 401);
+        }
+
+        try {
             $userId = auth()->user()->id;
             $event = DB::table('events')->where('id', $event_id)->first();
-            if ($event) {
-                $isSubscribed = DB::table('attendees')->where('event_id', $event_id)->where('user_id', $userId)->exists();
-                if ($isSubscribed) {
-                    DB::table('attendees')->where('event_id', $event_id)->where('user_id', $userId)->delete();
-                    return response()->json(['message' => 'Unsubscribed from event'], 200);
-                } else {
-                    DB::table('attendees')->insert(['event_id' => $event_id, 'user_id' => $userId]);
-                    return response()->json(['message' => 'Subscribed to event'], 200);
-                }
-            } else {
+
+            if (!$event) {
                 return response()->json(['message' => 'Event not found'], 404);
             }
-        } else {
-            return response()->json(['message' => 'Unauthorized Joe'], 401);
+
+            $isSubscribed = DB::table('attendees')->where('event_id', $event_id)->where('user_id', $userId)->exists();
+
+            if ($isSubscribed) {
+                DB::table('attendees')->where('event_id', $event_id)->where('user_id', $userId)->delete();
+                $message = "user " . auth()->user()->name . " unsubscribed from event " . $event->title;
+                $action = 'unsubscribing_event';
+                ActivityLog::createLog(auth()->id(), $event_id ? $event_id : 0, $action, $message);
+                return response()->json(['message' => 'Unsubscribed from event'], 200);
+            } else {
+                DB::table('attendees')->insert(['event_id' => $event_id, 'user_id' => $userId]);
+                $message = "user " . auth()->user()->name . " subscribed to event " . $event->title;
+                $action = 'subscribing_event';
+                ActivityLog::createLog(auth()->id(), $event_id ? $event_id : 0, $action, $message);
+                return response()->json(['message' => 'Subscribed to event'], 200);
+            }
+        } catch (\Exception $e) {
+            Log::error("Error toggling event subscription: " . $e->getMessage());
+            return response()->json(['message' => 'Error processing your request. Please try again later.'], 500);
         }
     }
 }

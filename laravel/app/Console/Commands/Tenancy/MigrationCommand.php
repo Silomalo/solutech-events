@@ -68,15 +68,30 @@ class MigrationCommand extends Command
      */
     private function migrateDatabase(string $tenant_db)
     {
-        Tenant::switchingDBConnection($tenant_db);
-
         try {
+            // Switch connection to the tenant database
+            Tenant::switchingDBConnection($tenant_db);
+
             $this->info($tenant_db . ' - Migration start');
-            Artisan::call('migrate', [
-                '--database' => $tenant_db,
-                '--force' => true,
-                '--path' => 'database/migrations/tenancy',
-            ]);
+
+            // First, try using the tenant_db as connection name
+            try {
+                Artisan::call('migrate', [
+                    '--database' => $tenant_db,
+                    '--force' => true,
+                    '--path' => 'database/migrations/tenancy',
+                ]);
+            } catch (\Exception $e) {
+                $this->line("Falling back to 'tenant' connection for {$tenant_db}");
+
+                // If that fails, try using the 'tenant' connection
+                Artisan::call('migrate', [
+                    '--database' => 'tenant',
+                    '--force' => true,
+                    '--path' => 'database/migrations/tenancy',
+                ]);
+            }
+
             $this->info($tenant_db . ' - Migration end');
         } catch (\Exception $e) {
             $this->error($tenant_db . ' ' . $e->getMessage());
