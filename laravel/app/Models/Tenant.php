@@ -55,7 +55,7 @@ class Tenant extends Model
     public static function getFullDomainProperty($sub_domain = null)
     {
         // $centralUrl = env('CENTRAL_URL', 'http://localhost:8000');
-        $centralUrl = env('CENTRAL_URL', 'https://events.solutech.com');
+        $centralUrl = env('CENTRAL_URL', 'http://31.220.111.227:8000');
         if (!$sub_domain) {
             return $centralUrl;
         }
