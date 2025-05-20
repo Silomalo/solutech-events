@@ -1,3 +1,21 @@
+# Live Demo
+
+## Frontend Application
+- Nuxt: [http://31.220.111.227:3005/](http://31.220.111.227:3005/)
+
+## Backend Administration
+- Laravel Admin Panel: [http://31.220.111.227:8000](http://31.220.111.227:8000)
+  - Username: `admin@admin.com`
+  - Password: `admin@admin.com`
+
+## Instructions
+1. Log in to the Laravel admin panel using the credentials above
+2. Create a new organization
+3. Activate the organization to generate a clickable subdomain link
+4. Access the subdomain using the same credentials
+
+
+
 # Quick Local Setup
 
 ## 1. Laravel Backend
